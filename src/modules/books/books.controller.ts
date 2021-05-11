@@ -6,6 +6,9 @@ import {
   Put,
   Delete,
   UseInterceptors,
+  Param,
+  Req,
+  Res,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
@@ -21,18 +24,17 @@ export class BooksController {
   public async getAllBooks(_: Request, res: Response) {
     try {
       const books = await this.service.getAll();
-      return res.status(200).json(books);
+      return books;
     } catch (e) {
       errorHandlerApi(res)(e);
     }
   }
 
   @Get(':id')
-  public async getBookById(req: Request, res: Response) {
+  public async getBookById(@Param('id') id: string, @Res() res) {
     try {
-      const { id } = req.params;
       const book = await this.service.getOne(id);
-      return res.status(200).json(book);
+      return book;
     } catch (e) {
       errorHandlerApi(res)(e);
     }
@@ -47,11 +49,11 @@ export class BooksController {
         if (file) {
           const bookParams = { ...body, fileBook: file.path };
           const { book } = await this.service.create(bookParams);
-          return res.status(201).json(book);
+          return book;
         }
-        return res.status(400).json('Where is book file, Bukovski?');
+        return 'Where is book file, Bukovski?';
       }
-      return res.status(400).json('Where is request body, Lebovski?');
+      return 'Where is request body, Lebovski?';
     } catch (e) {
       errorHandlerApi(res)(e);
     }
@@ -59,7 +61,7 @@ export class BooksController {
 
   @Put(':id')
   @UseInterceptors(FileInterceptor('file'))
-  public async modifyBookById(req: Request, res: Response) {
+  public async modifyBookById(@Req() req, res: Response) {
     const { body, params, file } = req;
     const { id } = params;
     if (file) body.fileBook = file.path;
@@ -68,7 +70,7 @@ export class BooksController {
       const updatedBook = await this.service.updateOne(id, body, {
         new: true,
       });
-      return res.status(200).json(updatedBook);
+      return updatedBook;
     } catch (e) {
       errorHandlerApi(res)(e);
     }
@@ -79,7 +81,7 @@ export class BooksController {
     const { id } = req.params;
     return this.service
       .deleteOne(id)
-      .then(() => res.status(200).json('ok'))
+      .then(() => 'ok')
       .catch(errorHandlerApi(res));
   }
 
@@ -91,7 +93,7 @@ export class BooksController {
       const filePath = path.join(APP_ROOT_PATH, book.fileBook);
       return res.download(filePath, 'book.pdf', (err: any) => {
         if (err) {
-          res.status(404).json(err);
+          return err;
         }
       });
     } catch (e) {

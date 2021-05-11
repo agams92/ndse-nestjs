@@ -28,7 +28,25 @@ export class BooksService {
   constructor(
     @InjectModel(Book.name) private BookModel: Model<BookDocument>,
     @InjectConnection() private connection: Connection,
-  ) {}
+  ) {
+    this.initializeDB()
+  }
+
+  public async initializeDB() {
+    const booksInitCount = [1, 2, 3];
+    for await (const el of booksInitCount) {
+      try {
+        const filter = { title: `Title ${el}` };
+        const book = await this.BookModel.findOne(filter);
+        if (!book) {
+          const newBook = new this.BookModel(filter);
+          await newBook.save();
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  }
 
   public async create(
     data: CreateBookDto,
