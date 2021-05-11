@@ -21,7 +21,7 @@ export class BooksController {
   constructor(private service: BooksService) {}
 
   @Get()
-  public async getAllBooks(_: Request, res: Response) {
+  public async getAllBooks(@Res() res) {
     try {
       const books = await this.service.getAll();
       return books;
@@ -42,16 +42,16 @@ export class BooksController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
-  public async addBook(req: Request, res: Response) {
+  public async addBook(@Req() req, @Res() res) {
     try {
       const { body, file } = req;
       if (body) {
-        if (file) {
-          const bookParams = { ...body, fileBook: file.path };
+        // if (file) {
+          const bookParams = { ...body, fileBook: file?.path || '' };
           const { book } = await this.service.create(bookParams);
           return book;
-        }
-        return 'Where is book file, Bukovski?';
+        // }
+        // return 'Where is book file, Bukovski?';
       }
       return 'Where is request body, Lebovski?';
     } catch (e) {
@@ -77,7 +77,7 @@ export class BooksController {
   }
 
   @Delete(':id')
-  public deleteBookById(req: Request, res: Response) {
+  public deleteBookById(@Req() req, @Res() res) {
     const { id } = req.params;
     return this.service
       .deleteOne(id)
@@ -86,7 +86,7 @@ export class BooksController {
   }
 
   @Get()
-  public async downloadBook(req: Request, res: Response) {
+  public async downloadBook(@Req() req, @Res() res) {
     const { id } = req.params;
     try {
       const book = await this.service.getOne(id);
