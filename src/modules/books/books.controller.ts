@@ -9,12 +9,14 @@ import {
   Param,
   Req,
   Res,
+  UsePipes,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
 import { errorHandlerApi } from '../../utils';
 import { APP_ROOT_PATH } from '../../constants';
 import { BooksService } from './books.service';
+import { ValidationPipe, bookCreateSchema } from './books.pipe';
 
 @Controller('books')
 export class BooksController {
@@ -42,14 +44,15 @@ export class BooksController {
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
+  @UsePipes(new ValidationPipe(bookCreateSchema))
   public async addBook(@Req() req, @Res() res) {
     try {
       const { body, file } = req;
       if (body) {
         // if (file) {
-          const bookParams = { ...body, fileBook: file?.path || '' };
-          const { book } = await this.service.create(bookParams);
-          return book;
+        const bookParams = { ...body, fileBook: file?.path || '' };
+        const { book } = await this.service.create(bookParams);
+        return book;
         // }
         // return 'Where is book file, Bukovski?';
       }
