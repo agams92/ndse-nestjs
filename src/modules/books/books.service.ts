@@ -29,7 +29,7 @@ export class BooksService {
     @InjectModel(Book.name) private BookModel: Model<BookDocument>,
     @InjectConnection() private connection: Connection,
   ) {
-    this.initializeDB()
+    this.initializeDB();
   }
 
   public async initializeDB() {

@@ -1,18 +1,20 @@
 version: "3.9"
 services:
   mongodb:
-    image: mongo
-    restart: always
+    image: mongo:latest
+    env_file:
+      - .env
+    ports:
+      - "27017:27017"
     expose:
       - 27017
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${DB_USERNAME:-root}
       - MONGO_INITDB_ROOT_PASSWORD=${DB_PASSWORD:-password}
-      - MONGO_INITDB_DATABASE=${DB_NAME:-books_db}
+      - MONGO_INITDB_DATABASE=${DB_NAME:-nest_app}
 
   mongo-express:
     image: mongo-express
-    restart: always
     ports:
       - 8081:8081
     environment:
@@ -41,6 +43,7 @@ services:
       - DB_NAME=${DB_NAME:-books_db}
       - DB_HOST=mongodb://mongodb:27017
       - PORT=${WEB_SERVICE_PORT:-3000}
+      - JWT_SECRET=${JWT_SECRET:-kek}
     depends_on:
       - mongodb
     command: npm run start:dev

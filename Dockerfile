@@ -3,6 +3,7 @@ FROM node:latest as base
 WORKDIR /ndse-nestjs
 
 COPY package.json ./
+COPY yarn.lock ./
 RUN yarn
 
 COPY ./src/ ./src/

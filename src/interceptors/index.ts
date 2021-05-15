@@ -18,9 +18,11 @@ export class WrapperInterceptor implements NestInterceptor {
     return next.handle().pipe(
       map((data) => ({ status: 'success', data })),
       catchError((err) => {
-        console.log(err.message)
-        return throwError(new InternalServerErrorException({status: 'fail', data: err}))
-      })
+        console.log(err.message);
+        return throwError(
+          new InternalServerErrorException({ status: 'fail', data: err }),
+        );
+      }),
     );
   }
 }

@@ -10,6 +10,7 @@ import {
   Req,
   Res,
   UsePipes,
+  UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Request, Response } from 'express';
@@ -17,35 +18,37 @@ import { errorHandlerApi } from '../../utils';
 import { APP_ROOT_PATH } from '../../constants';
 import { BooksService } from './books.service';
 import { ValidationPipe, bookCreateSchema } from './books.pipe';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+@UseGuards(JwtAuthGuard)
 @Controller('books')
 export class BooksController {
   constructor(private service: BooksService) {}
 
   @Get()
-  public async getAllBooks(@Res() res) {
+  public async getAllBooks() {
     try {
       const books = await this.service.getAll();
       return books;
     } catch (e) {
-      errorHandlerApi(res)(e);
+      errorHandlerApi(e);
     }
   }
 
   @Get(':id')
-  public async getBookById(@Param('id') id: string, @Res() res) {
+  public async getBookById(@Param('id') id: string) {
     try {
       const book = await this.service.getOne(id);
       return book;
     } catch (e) {
-      errorHandlerApi(res)(e);
+      errorHandlerApi(e);
     }
   }
 
   @Post('upload')
   @UseInterceptors(FileInterceptor('file'))
   @UsePipes(new ValidationPipe(bookCreateSchema))
-  public async addBook(@Req() req, @Res() res) {
+  public async addBook(@Req() req) {
     try {
       const { body, file } = req;
       if (body) {
@@ -58,7 +61,7 @@ export class BooksController {
       }
       return 'Where is request body, Lebovski?';
     } catch (e) {
-      errorHandlerApi(res)(e);
+      errorHandlerApi(e);
     }
   }
 
@@ -75,17 +78,17 @@ export class BooksController {
       });
       return updatedBook;
     } catch (e) {
-      errorHandlerApi(res)(e);
+      errorHandlerApi(e);
     }
   }
 
   @Delete(':id')
-  public deleteBookById(@Req() req, @Res() res) {
+  public deleteBookById(@Req() req) {
     const { id } = req.params;
     return this.service
       .deleteOne(id)
       .then(() => 'ok')
-      .catch(errorHandlerApi(res));
+      .catch(errorHandlerApi);
   }
 
   @Get()
@@ -100,7 +103,7 @@ export class BooksController {
         }
       });
     } catch (e) {
-      errorHandlerApi(res)(e);
+      errorHandlerApi(e);
     }
   }
 }
